@@ -59,7 +59,7 @@ if %errorlevel% equ 1 (
 echo ###############################
 echo # BOOT パーティションを FLASH #
 echo ##############################
-choice /m "両方のスロットにイメージを Flash しますか? 不明な場合は｢N｣と入力してください。"
+choice /m "両方のスロットにイメージを Flash しますか? 不明な場合は｢N｣を入力してください。"
 if %errorlevel% equ 1 (
     set slot=all
 ) else (
@@ -148,7 +148,7 @@ echo #  論理パーティションに FLASH  #
 echo ###############################
 echo 論理パーティションにイメージを Flash しますか?
 echo 独自の論理パーティションで配布をするカスタム ROM をインストールする場合は｢N｣を入力してください。
-choice /m "不明な場合は｢Y｣と入力してください。"
+choice /m "不明な場合は｢Y｣を入力してください。"
 if %errorlevel% equ 1 (
     if not exist super.img (
         if exist super_empty.img (
@@ -168,7 +168,7 @@ echo #########################
 echo #  BOOTLOADER のロック  #
 echo ########################
 if %avb_enabled% equ 1 (
-    choice /m "Bootloader をロックしますか?不明な場合は｢N｣を入力してください。"
+    choice /m "Bootloader をロックしますか? 不明な場合は｢N｣を入力してください。"
     if %errorlevel% equ 1 (
         %fastboot% reboot bootloader
         if %errorlevel% neq 0 (
@@ -184,7 +184,7 @@ if %avb_enabled% equ 1 (
 echo ##########
 echo # 再起動 #
 echo #########
-choice /m "システムを再起動しますか?不明な場合は｢Y｣を入力してください。"
+choice /m "システムを再起動しますか? 不明な場合は｢Y｣を入力してください。"
 if %errorlevel% equ 1 (
     %fastboot% reboot
 )
@@ -207,14 +207,14 @@ exit /b
 :ErasePartition
 %fastboot% erase %~1
 if %errorlevel% neq 0 (
-    call :Choice "Erasing %~1 partition failed"
+    call :Choice "%~1 のパーティションの消去に失敗しました。"
 )
 exit /b
 
 :SetActiveSlot
 %fastboot% --set-active=a
 if %errorlevel% neq 0 (
-    echo Error occured while switching to slot A. Aborting
+    echo スロット A への切り替え中にエラーが発生しました。中止します。
     pause
     exit
 )
@@ -223,7 +223,7 @@ exit /b
 :WipeSuperPartition
 %fastboot% wipe-super super_empty.img
 if %errorlevel% neq 0 (
-    echo Wiping super partition failed. Fallback to deleting and creating logical partitions
+    echo Super パーティションの消去に失敗しました。論理パーティションの削除と作成にフォールバックします。
     call :ResizeLogicalPartition
 )
 exit /b
@@ -241,26 +241,26 @@ exit /b
 :DeleteLogicalPartition
 %fastboot% delete-logical-partition %~1
 if %errorlevel% neq 0 (
-    call :Choice "Deleting %~1 partition failed"
+    call :Choice "%~1 のパーティションの消去に失敗しました。"
 )
 exit /b
 
 :CreateLogicalPartition
 %fastboot% create-logical-partition %~1 %~2
 if %errorlevel% neq 0 (
-    call :Choice "Creating %~1 partition failed"
+    call :Choice "%~1 のパーティションの作成に失敗しました。"
 )
 exit /b
 
 :FlashImage
 %fastboot% flash %~1 %~2
 if %errorlevel% neq 0 (
-    call :Choice "Flashing %~2 failed"
+    call :Choice "%~2 の Flash に失敗しました。"
 )
 exit /b
 
 :Choice
-choice /m "%~1 continue? If unsure say N"
+choice /m "%~1 を続行しますか? 不明な場合は｢N｣を入力してください。"
 if %errorlevel% equ 2 (
     exit
 )
