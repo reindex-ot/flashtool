@@ -5,6 +5,7 @@ echo ###########################################################################
 echo #                Pacman Fastboot ROM Flasher                                #
 echo #                   Developed/Tested By                                     #
 echo #  HELLBOY017, viralbanda, spike0en, PHATwalrus, arter97, AntoninoScordino  #
+echo #         Japanese Translation: Re*Index.(ot_inc)                           #
 echo #          [Nothing Phone (2a) Telegram Dev Team]                           #
 echo #############################################################################
 
@@ -18,7 +19,7 @@ if not exist platform-tools-latest (
 
 set fastboot=.\platform-tools-latest\platform-tools\fastboot.exe
 if not exist %fastboot% (
-    echo Fastboot cannot be executed. Aborting
+    echo Fastboot を実行できません。中止します。
     pause
     exit
 )
@@ -30,7 +31,7 @@ set logical_partitions=odm_dlkm odm vendor_dlkm product vendor system_dlkm syste
 set vbmeta_partitions=vbmeta vbmeta_system vbmeta_vendor
 
 echo #############################
-echo # CHECKING FASTBOOT DEVICES #
+echo # FASTBOOT デバイスを確認中 #
 echo #############################
 %fastboot% devices
 
@@ -38,27 +39,27 @@ echo #############################
 set /p active_slot= < tmpFile.txt
 del /f /q tmpFile.txt
 if %active_slot% equ 0 (
-    echo #############################
-    echo # CHANGING ACTIVE SLOT TO A #
-    echo #############################
+    echo ###################################
+    echo # アクティブスロットを A に変更中 #
+    echo ###################################
     call :SetActiveSlot
 )
 set curSlot=a
 
+echo ####################
+echo #  データの初期化  #
 echo ###################
-echo # FORMATTING DATA #
-echo ###################
-choice /m "Wipe Data?"
+choice /m "データを初期化しますか?"
 if %errorlevel% equ 1 (
-    echo Please ignore "Did you mean to format this partition?" warnings.
+    echo ｢Did you mean to format this partition?｣という警告は無視してください。
     call :ErasePartition userdata
     call :ErasePartition metadata
 )
 
-echo ############################
-echo # FLASHING BOOT PARTITIONS #
-echo ############################
-choice /m "Flash images on both slots? If unsure, say N."
+echo ###############################
+echo # BOOT パーティションを FLASH #
+echo ##############################
+choice /m "両方のスロットにイメージを Flash しますか? 不明な場合は｢N｣と入力してください。"
 if %errorlevel% equ 1 (
     set slot=all
 ) else (
@@ -77,9 +78,9 @@ if %slot% equ all (
     )
 )
 
-echo #####################
-echo # FLASHING FIRMWARE #
-echo #####################
+echo ##########################
+echo # ファームウェアを FLASH #
+echo #########################
 if %slot% equ all (
     for %%i in (%firmware_partitions%) do (
         for %%s in (a b) do (
@@ -102,9 +103,9 @@ if %slot% equ all (
 )
 
 echo ###################
-echo # FLASHING VBMETA #
+echo # VBMETA を FLASH #
 echo ###################
-choice /m "Disable android verified boot?, If unsure, say N. Bootloader won't be lockable if you select Y."
+choice /m "Android Verified Boot を無効化しますか? 不明な場合は｢N｣を入力してください。｢Y｣を入力した場合、Bootloader のロックができなくなります。"
 if %errorlevel% equ 1 (
     if %slot% equ all (
         for %%i in (%vbmeta_partitions%) do (
@@ -132,22 +133,22 @@ if %errorlevel% equ 1 (
     )
 )
 
-echo ##########################             
-echo # REBOOTING TO FASTBOOTD #       
+echo ##########################
+echo #   FASTBOOTD で再起動   #
 echo ##########################
 %fastboot% reboot fastboot
 if %errorlevel% neq 0 (
-    echo Error occured while rebooting to fastbootd. Aborting
+    echo fastboot の再起動中にエラーが発生しました。中止します。
     pause
     exit
 )
 
+echo ################################
+echo #  論理パーティションに FLASH  #
 echo ###############################
-echo # FLASHING LOGICAL PARTITIONS #
-echo ###############################
-echo Flash logical partition images?
-echo If you're about to install a custom ROM that distributes its own logical partitions, say N.
-choice /m "If unsure, say Y."
+echo 論理パーティションにイメージを Flash しますか?
+echo 独自の論理パーティションで配布をするカスタム ROM をインストールする場合は｢N｣を入力してください。
+choice /m "不明な場合は｢Y｣と入力してください。"
 if %errorlevel% equ 1 (
     if not exist super.img (
         if exist super_empty.img (
@@ -163,15 +164,15 @@ if %errorlevel% equ 1 (
     )
 )
 
-echo ##########################
-echo # LOCKING THE BOOTLOADER #
-echo ##########################
+echo #########################
+echo #  BOOTLOADER のロック  #
+echo ########################
 if %avb_enabled% equ 1 (
-    choice /m "Lock the bootloader? If unsure, say N."
+    choice /m "Bootloader をロックしますか?不明な場合は｢N｣を入力してください。"
     if %errorlevel% equ 1 (
         %fastboot% reboot bootloader
         if %errorlevel% neq 0 (
-            echo Error occured while rebooting to bootloader. Aborting
+            echo Bootloader の再起動中にエラーが発生しました。中止します。
             pause
             exit
         ) else (
@@ -180,19 +181,19 @@ if %avb_enabled% equ 1 (
     )
 )
 
-echo #############
-echo # REBOOTING #
-echo #############
-choice /m "Reboot to system? If unsure, say Y."
+echo ##########
+echo # 再起動 #
+echo #########
+choice /m "システムを再起動しますか?不明な場合は｢Y｣を入力してください。"
 if %errorlevel% equ 1 (
     %fastboot% reboot
 )
 
 echo ########
-echo # DONE #
+echo # 完了 #
 echo ########
-echo Stock firmware restored.
-echo You may now optionally re-lock the bootloader if you haven't disabled android verified boot.
+echo Stock ファームウェアが復元されました。
+echo Android Verified Boot を無効化していない場合は、オプションで Bootloader をロックすることができます。
 
 pause
 exit
